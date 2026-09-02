@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: distributed-task-scheduler
+  profiles:
+    active: dev
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, info
