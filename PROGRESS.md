@@ -29,7 +29,8 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 - Docker compose yml
   - Services, versions, volumes, networks
   - Mounts and binds for data persistence
-  - TestContainers for DBs and Redis integration testing
+  - TestContainers (temporary containers) for DBs and Redis integration testing
+  - Docker Compose for local development and Run Config path for CI/CD
 
 ### Blockers
 -
@@ -53,7 +54,7 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 | Integration | | ☐ Pass ☐ Fail |
 
 ### Notes / Learnings
--
+- Flyway migrations and usage.
 
 ### Blockers
 -
