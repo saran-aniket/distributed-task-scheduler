@@ -2,7 +2,11 @@ package com.personal.distributedtaskscheduler.entity;
 
 import com.personal.distributedtaskscheduler.entity.enums.JobMisfirePolicy;
 import com.personal.distributedtaskscheduler.entity.enums.JobStatus;
+import com.personal.distributedtaskscheduler.entity.enums.JobType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -18,8 +22,9 @@ public class Job extends BaseModel{
     @Column(name = "name", columnDefinition = "varchar(255)")
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "job_type", columnDefinition = "varchar(50)")
-    private String jobType;
+    private JobType jobType;
 
     @Column(name = "cron_expression", columnDefinition = "varchar(100)")
     private String cronExpression;
@@ -28,7 +33,7 @@ public class Job extends BaseModel{
     @Column(name = "payload", columnDefinition = "jsonb")
     private Map<String, Object> payload;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "varchar(20)")
     private JobStatus status;
 
@@ -36,12 +41,14 @@ public class Job extends BaseModel{
     private String webhookUrl;
 
     @Column(name = "max_retries", columnDefinition = "integer")
-    private int maxRetries;
+    @ColumnDefault("3")
+    private int maxRetries=3;
 
     @Column(name = "backoff_seconds", columnDefinition = "integer")
-    private int backoffSeconds;
+    @ColumnDefault("30")
+    private int backoffSeconds=30;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "misfire_policy", columnDefinition = "varchar(20)")
     private JobMisfirePolicy misfirePolicy;
 
@@ -64,11 +71,11 @@ public class Job extends BaseModel{
         this.name = name;
     }
 
-    public String getJobType() {
+    public JobType getJobType() {
         return jobType;
     }
 
-    public void setJobType(String jobType) {
+    public void setJobType(JobType jobType) {
         this.jobType = jobType;
     }
 
@@ -134,5 +141,22 @@ public class Job extends BaseModel{
 
     public void setNextFireTime(Instant nextFireTime) {
         this.nextFireTime = nextFireTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "id=" + getId() +
+                ", name='" + name + '\'' +
+                ", jobType=" + jobType +
+                ", cronExpression='" + cronExpression + '\'' +
+                ", payload=" + payload +
+                ", status=" + status +
+                ", webhookUrl='" + webhookUrl + '\'' +
+                ", maxRetries=" + maxRetries +
+                ", backoffSeconds=" + backoffSeconds +
+                ", misfirePolicy=" + misfirePolicy +
+                ", nextFireTime=" + nextFireTime +
+                '}';
     }
 }

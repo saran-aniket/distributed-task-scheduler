@@ -17,7 +17,7 @@ public class ApiKey extends BaseModel{
     @Column(name = "key_hash", columnDefinition = "varchar(255)")
     private String keyHash;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", columnDefinition = "varchar(20)")
     private RoleType role;
 

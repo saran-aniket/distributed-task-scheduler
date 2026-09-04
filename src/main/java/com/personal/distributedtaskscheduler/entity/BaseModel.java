@@ -20,4 +20,28 @@ public class BaseModel {
     @LastModifiedDate
     @Column(name = "updated_at", columnDefinition = "timestamp")
     private Instant lastModifiedDate;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Instant getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Instant createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
 }

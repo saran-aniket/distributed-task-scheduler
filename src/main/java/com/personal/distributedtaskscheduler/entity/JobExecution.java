@@ -20,7 +20,7 @@ public class JobExecution extends BaseModel{
     @Column(name = "completed_at", columnDefinition = "timestamp")
     private Instant completedAt;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "varchar(20)")
     private JobExecutionStatus status;
 

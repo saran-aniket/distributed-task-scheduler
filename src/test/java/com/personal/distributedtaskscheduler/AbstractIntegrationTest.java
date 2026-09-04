@@ -36,5 +36,7 @@ public abstract class AbstractIntegrationTest {
 
         registry.add("spring.data.redis.host", redis::getHost);
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(REDIS_PORT));
+
+        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
     }
 }
