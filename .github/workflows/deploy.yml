@@ -43,12 +43,41 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       # Production Best Practice: Generate .env file dynamically on the runner
       # It never gets committed to git, and dissolves when the runner turns off
       - name: Inject Environment File (.env)
         run: |
           echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+
+      - name: Start Docker Compose stack
+        run: docker compose up -d --build
+
+      - name: Wait for application startup
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://localhost:8080/actuator/health; then
+              echo "Application is healthy"
+              exit 0
+            fi
+          
+            echo "Waiting for application to become healthy... attempt $i"
+            sleep 5
+          done
+          
+          echo "Application did not become healthy in time"
+          docker compose logs
+          exit 1
+
+      - name: Verify application health
+        run: curl --fail http://localhost:8080/actuator/health
+
+      - name: Show Docker Compose logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop Docker Compose stack
+        if: always()
+        run: docker compose down -v
 
       # OPTIONAL: If your Dockerfile packages the .env inside the image
       # (Not recommended for public images, but common for private services)
