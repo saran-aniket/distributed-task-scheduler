@@ -1,0 +1,97 @@
+name: Production Multi-Environment CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+  pull_request:
+    types: [ opened, synchronize, reopened ] # Triggers when PR is created, updated with new commits, or reopened
+    branches:
+      - dev
+      - staging
+      - main
+
+jobs:
+  # Job 1: Always validate code first
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build & Test
+        run: mvn clean verify
+
+  # Job 2: Deploy to the branch-specific environment
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    # Map branches to GitHub Environments dynamically
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'staging' && 'staging' || 'development' }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      # Production Best Practice: Generate .env file dynamically on the runner
+      # It never gets committed to git, and dissolves when the runner turns off
+      - name: Inject Environment File (.env)
+        run: |
+          echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+
+      - name: Start Docker Compose stack
+        run: docker compose up -d --build
+
+      - name: Wait for application startup
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://localhost:8080/actuator/health; then
+              echo "Application is healthy"
+              exit 0
+            fi
+          
+            echo "Waiting for application to become healthy... attempt $i"
+            sleep 5
+          done
+          
+          echo "Application did not become healthy in time"
+          docker compose logs
+          exit 1
+
+      - name: Verify application health
+        run: curl --fail http://localhost:8080/actuator/health
+
+      - name: Show Docker Compose logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop Docker Compose stack
+        if: always()
+        run: docker compose down -v
+
+      # OPTIONAL: If your Dockerfile packages the .env inside the image
+      # (Not recommended for public images, but common for private services)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image with Environment
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false # Set to true once Docker Registry credentials are added
+          tags: |
+            my-app-${{ github.ref_name }}:latest
+            my-app-${{ github.ref_name }}:${{ github.sha }}
+          # If your Dockerfile expects .env at build time, you pass it here:
+          # secret-files: |
+          #   env_file=./.env
