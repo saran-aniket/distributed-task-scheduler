@@ -29,7 +29,8 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 - Docker compose yml
   - Services, versions, volumes, networks
   - Mounts and binds for data persistence
-  - TestContainers for DBs and Redis integration testing
+  - TestContainers (temporary containers) for DBs and Redis integration testing
+  - Docker Compose for local development and Run Config path for CI/CD
 
 ### Blockers
 -
@@ -39,21 +40,25 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 ## Day 2 — Domain Model & Schema
 
 ### Tasks completed
-- [ ] Flyway migrations (tenants, api_keys, jobs, job_executions, audit_log)
-- [ ] JPA entities created
-- [ ] Repositories created
-- [ ] `POST /jobs`, `GET /jobs`, `GET /jobs/{id}` working
+- [x] Flyway migrations (tenants, api_keys, jobs, job_executions, audit_log)
+- [x] JPA entities created
+- [x] Repositories created
+- [x] `POST /jobs`, `GET /jobs`, `GET /jobs/{id}` working
 
 ### Tests written
 | Type | Test name | Status |
 |---|---|---|
-| Unit | | ☐ Pass ☐ Fail |
-| Unit | | ☐ Pass ☐ Fail |
-| Integration | | ☐ Pass ☐ Fail |
-| Integration | | ☐ Pass ☐ Fail |
+| Unit | `JobServiceTest` | ☑ Pass ☐ Fail |
+| Unit | `CronExpressionPatternTest` | ☑ Pass ☐ Fail |
+| Integration | `JobRepositoryIT` | ☑ Pass ☐ Fail |
+| Integration | `JobControllerIT` | ☑ Pass ☐ Fail |
 
 ### Notes / Learnings
--
+- Flyway migrations and usage.
+- JPA entities and repositories.
+- Container Testing
+- Mapping JSONs to entities and vice versa.
+- MockMVC round trip testing with WebApplicationContext pattern
 
 ### Blockers
 -
