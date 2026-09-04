@@ -38,7 +38,7 @@ jobs:
 
     # Map branches to GitHub Environments dynamically
     environment:
-      name: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'staging' && 'staging' || 'dev' }}
+      name: ${{ github.ref_name == 'main' && 'production' || github.ref_name == 'staging' && 'staging' || 'development' }}
 
     steps:
       - name: Checkout Code
