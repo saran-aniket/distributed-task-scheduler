@@ -6,6 +6,12 @@ on:
       - dev
       - staging
       - main
+  pull_request:
+    types: [ opened, synchronize, reopened ] # Triggers when PR is created, updated with new commits, or reopened
+    branches:
+      - dev
+      - staging
+      - main
 
 jobs:
   # Job 1: Always validate code first
