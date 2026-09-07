@@ -1,7 +1,7 @@
 services:
   task-scheduler-service-node-1:
     build:
-      context: .
+      context: distributed-task-service/
       dockerfile: Dockerfile
     image: task-scheduler-service:latest
     container_name: task-scheduler-service-node-1
