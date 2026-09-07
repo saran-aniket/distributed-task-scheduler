@@ -17,6 +17,9 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}
       port: ${SPRING_DATA_REDIS_PORT}
+
+  redisson-lock-prefix: "distributed_lock_"
+
 management:
   health:
     db:
@@ -27,5 +30,24 @@ management:
 scheduler:
   poll-interval-ms: 5000
   jitter-ms: 2000
-  dispatch-interval-ms: 5000ms
+  dispatch-interval-ms: 5000
   batch-size: 10
+  wait-time-ms: 2000
+  lease-time-ms: 30000
+  execution-timeout-ms: 75000
+  misfire-check-interval-ms: 10000
+
+---
+#Test data setup
+spring:
+  config:
+    activate:
+      on-profile: ${SPRING_PROFILES_ACTIVE:dev}
+  flyway:
+    # Appends the test-data folder so it runs alongside standard migrations
+    locations:
+      - classpath:db/migration
+      - classpath:db/test-data
+    # Maps Spring properties to Flyway SQL script variables
+    placeholders:
+      test.user.prefix: "test-user-"

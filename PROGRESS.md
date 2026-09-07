@@ -114,7 +114,8 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 | Load | Burst due-jobs test | Duplicates found: _______ (target: 0) |
 
 ### Notes / Learnings
--
+- Redisson – To increase reliability during failover, all operations wait for propagation to all Redis slaves.
+- Docker container are individual miniature Linux machines where JVM works as a system. It is not shared with other containers.
 
 ### Blockers
 -

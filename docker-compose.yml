@@ -1,9 +1,10 @@
 services:
-  task-scheduler-service:
+  task-scheduler-service-node-1:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task-scheduler-service
+    image: task-scheduler-service:latest
+    container_name: task-scheduler-service-node-1
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
@@ -16,6 +17,39 @@ services:
     depends_on:
       - postgres
       - redis
+  task-scheduler-service-node-2:
+    image: task-scheduler-service:latest
+    container_name: task-scheduler-service-node-2
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+      - redis
+      - task-scheduler-service-node-1
+
+  task-scheduler-service-node-3:
+    image: task-scheduler-service:latest
+    container_name: task-scheduler-service-node-3
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT}
+    ports:
+      - "8082:8080"
+    depends_on:
+      - postgres
+      - redis
+      - task-scheduler-service-node-1
   postgres:
     image: postgres:16-alpine
     container_name: postgres

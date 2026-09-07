@@ -21,7 +21,7 @@ public class ScheduledExecutorService {
     private static final Logger log = LoggerFactory.getLogger(ScheduledExecutorService.class);
     private final JobExecutionRepository jobExecutionRepository;
     @Value("${spring.redisson-lock-prefix:distributed_lock_}")
-    private static String LOCK_PREFIX;
+    private String LOCK_PREFIX;
     private final RedissonClient redissonClient;
 
     public ScheduledExecutorService(JobExecutionRepository jobExecutionRepository, RedissonClient redissonClient) {

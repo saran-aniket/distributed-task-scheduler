@@ -1,6 +1,6 @@
 package com.personal.distributedtaskscheduler.configuration;
 
-import com.personal.distributedtaskscheduler.service.JobScannerService;
+import com.personal.distributedtaskscheduler.service.scheduled.JobScannerService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

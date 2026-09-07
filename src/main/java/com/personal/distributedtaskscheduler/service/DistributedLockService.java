@@ -13,7 +13,7 @@ import java.time.Duration;
 public class DistributedLockService {
     private static final Logger log = LoggerFactory.getLogger(DistributedLockService.class);
     @Value("${spring.redisson-lock-prefix:distributed_lock_}")
-    private static String LOCK_PREFIX;
+    private String LOCK_PREFIX;
     private final RedissonClient redissonClient;
 
     public DistributedLockService(RedissonClient redissonClient) {

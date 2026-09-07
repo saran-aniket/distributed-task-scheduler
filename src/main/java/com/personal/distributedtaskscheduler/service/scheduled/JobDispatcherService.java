@@ -36,7 +36,7 @@ public class JobDispatcherService {
         this.distributedLockService = distributedLockService;
     }
 
-    @Scheduled(fixedDelayString = "${scheduler.dispatch-interval-ms}ms")
+    @Scheduled(fixedDelayString = "${scheduler.dispatch-interval-ms}")
     public void dispatchJobs() {
         log.info("Dispatching jobs...");
         List<JobExecution> pendingExecutions = jobExecutionRepository.findAllByStatus(JobExecutionStatus.PENDING);

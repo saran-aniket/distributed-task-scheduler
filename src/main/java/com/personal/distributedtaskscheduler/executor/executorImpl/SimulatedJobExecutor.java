@@ -2,10 +2,9 @@ package com.personal.distributedtaskscheduler.executor.executorImpl;
 
 import com.personal.distributedtaskscheduler.entity.Job;
 import com.personal.distributedtaskscheduler.entity.JobExecution;
-import com.personal.distributedtaskscheduler.entity.enums.JobExecutionStatus;
 import com.personal.distributedtaskscheduler.entity.enums.JobType;
 import com.personal.distributedtaskscheduler.executor.JobExecutor;
-import com.personal.distributedtaskscheduler.repository.JobExecutionRepository;
+import com.personal.distributedtaskscheduler.executor.model.ExecutionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,14 +17,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class SimulatedJobExecutor implements JobExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(SimulatedJobExecutor.class);
-    private final JobExecutionRepository jobExecutionRepository;
 
-    public SimulatedJobExecutor(JobExecutionRepository jobExecutionRepository) {
-        this.jobExecutionRepository = jobExecutionRepository;
+    public SimulatedJobExecutor() {
     }
 
     @Override
-    public JobExecutionStatus execute(JobExecution jobExecution, Job job) {
+    public ExecutionResult execute(JobExecution jobExecution, Job job) {
         log.info("Executing simulated job: {}", job.getName());
         Map<String, Object> payload = job.getPayload();
         long baseDurationMs = ((Number) payload.get("baseDurationMs")).longValue();
@@ -37,23 +34,14 @@ public class SimulatedJobExecutor implements JobExecutor {
         try {
             Thread.sleep(durationMs);
             if (shouldFail) {
-                jobExecution.setStatus(JobExecutionStatus.FAILED);
-                jobExecution.setErrorMessage(failureReason);
+                return new ExecutionResult(failureReason, false);
             } else {
-                jobExecution.setStatus(JobExecutionStatus.SUCCESS);
-                jobExecution.setCompletedAt(Instant.now());
+                return new ExecutionResult(null, true);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            jobExecution.setStatus(JobExecutionStatus.FAILED);
-            jobExecution.setErrorMessage("Job execution interrupted");
+            return new ExecutionResult("Job execution interrupted", false);
         }
-        if (jobExecution.getCompletedAt() == null) {
-            jobExecution.setCompletedAt(Instant.now());
-        }
-        jobExecution.setStartedAt(startedAt);
-        jobExecutionRepository.save(jobExecution);
-        return jobExecution.getStatus();
     }
 
     @Override

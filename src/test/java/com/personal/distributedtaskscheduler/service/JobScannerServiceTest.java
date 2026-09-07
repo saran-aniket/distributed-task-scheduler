@@ -6,6 +6,7 @@ import com.personal.distributedtaskscheduler.entity.enums.JobExecutionStatus;
 import com.personal.distributedtaskscheduler.entity.enums.JobStatus;
 import com.personal.distributedtaskscheduler.repository.JobExecutionRepository;
 import com.personal.distributedtaskscheduler.repository.JobRepository;
+import com.personal.distributedtaskscheduler.service.scheduled.JobScannerService;
 import com.personal.distributedtaskscheduler.utility.CronExpressionParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

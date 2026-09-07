@@ -3,17 +3,12 @@ package com.personal.distributedtaskscheduler.executor;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.personal.distributedtaskscheduler.entity.Job;
 import com.personal.distributedtaskscheduler.entity.JobExecution;
-import com.personal.distributedtaskscheduler.entity.enums.JobExecutionStatus;
 import com.personal.distributedtaskscheduler.executor.executorImpl.HTTPCallbackExecutor;
-import com.personal.distributedtaskscheduler.repository.JobExecutionRepository;
+import com.personal.distributedtaskscheduler.executor.model.ExecutionResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -26,16 +21,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 class HTTPCallbackExecutorTest {
 
     private WireMockServer wireMockServer;
-
-    @Mock
-    private JobExecutionRepository jobExecutionRepository;
-
     private HTTPCallbackExecutor httpCallbackExecutor;
 
     @BeforeEach
@@ -51,8 +40,7 @@ class HTTPCallbackExecutorTest {
         requestFactory.setReadTimeout(Duration.ofSeconds(1));
 
         httpCallbackExecutor = new HTTPCallbackExecutor(
-                RestClient.builder().requestFactory(requestFactory).build(),
-                jobExecutionRepository
+                RestClient.builder().requestFactory(requestFactory).build()
         );
     }
 
@@ -62,55 +50,46 @@ class HTTPCallbackExecutorTest {
     }
 
     @Test
-    void execute_marksExecutionSuccessfulWhenWebhookReturns200() {
+    void execute_returnsSuccessWhenWebhookReturns200() {
         wireMockServer.stubFor(post(urlEqualTo("/success"))
                 .willReturn(aResponse().withStatus(200)));
 
         JobExecution jobExecution = new JobExecution();
         Job job = webhookJob("/success");
 
-        JobExecutionStatus status = httpCallbackExecutor.execute(jobExecution, job);
+        ExecutionResult result = httpCallbackExecutor.execute(jobExecution, job);
 
-        assertThat(status).isEqualTo(JobExecutionStatus.SUCCESS);
-        assertThat(jobExecution.getStatus()).isEqualTo(JobExecutionStatus.SUCCESS);
-        assertThat(jobExecution.getCompletedAt()).isNotNull();
-        assertThat(jobExecution.getErrorMessage()).isNull();
-        verify(jobExecutionRepository).save(jobExecution);
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getMessage()).isNull();
     }
 
     @Test
-    void execute_marksExecutionFailedWhenWebhookReturns500() {
+    void execute_returnsFailureWhenWebhookReturns500() {
         wireMockServer.stubFor(post(urlEqualTo("/server-error"))
                 .willReturn(aResponse().withStatus(500).withBody("upstream exploded")));
 
         JobExecution jobExecution = new JobExecution();
         Job job = webhookJob("/server-error");
 
-        JobExecutionStatus status = httpCallbackExecutor.execute(jobExecution, job);
+        ExecutionResult result = httpCallbackExecutor.execute(jobExecution, job);
 
-        assertThat(status).isEqualTo(JobExecutionStatus.FAILED);
-        assertThat(jobExecution.getStatus()).isEqualTo(JobExecutionStatus.FAILED);
-        assertThat(jobExecution.getCompletedAt()).isNull();
-        assertThat(jobExecution.getErrorMessage()).contains("500").contains("upstream exploded");
-        verify(jobExecutionRepository).save(jobExecution);
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.getMessage()).contains("500").contains("upstream exploded");
     }
 
     @Test
     @Timeout(5)
-    void execute_marksExecutionFailedWhenWebhookTimesOut() {
+    void execute_returnsFailureWhenWebhookTimesOut() {
         wireMockServer.stubFor(post(urlEqualTo("/slow"))
                 .willReturn(aResponse().withStatus(200).withFixedDelay(3_000)));
 
         JobExecution jobExecution = new JobExecution();
         Job job = webhookJob("/slow");
 
-        JobExecutionStatus status = httpCallbackExecutor.execute(jobExecution, job);
+        ExecutionResult result = httpCallbackExecutor.execute(jobExecution, job);
 
-        assertThat(status).isEqualTo(JobExecutionStatus.FAILED);
-        assertThat(jobExecution.getStatus()).isEqualTo(JobExecutionStatus.FAILED);
-        assertThat(jobExecution.getCompletedAt()).isNull();
-        assertThat(jobExecution.getErrorMessage()).contains("timed out");
-        verify(jobExecutionRepository).save(jobExecution);
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.getMessage()).contains("Error") .containsIgnoringCase("executing");
     }
 
     private Job webhookJob(String path) {

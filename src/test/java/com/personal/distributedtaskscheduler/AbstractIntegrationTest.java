@@ -11,7 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(classes = DistributedTaskSchedulerApplication.class)
 @Testcontainers
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 public abstract class AbstractIntegrationTest {
 
     private static final int REDIS_PORT = 6379;
