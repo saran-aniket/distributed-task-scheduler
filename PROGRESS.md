@@ -77,11 +77,12 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 ### Tests written
 | Type | Test name | Status |
 |---|---|---|
-| Unit | Cron edge cases | ☐ Pass ☐ Fail |
-| Unit | Scanner due-job filtering | ☐ Pass ☐ Fail |
-| Unit | WireMock executor tests | ☐ Pass ☐ Fail |
-| Integration | End-to-end fire test | ☐ Pass ☐ Fail |
-| Integration | `SKIP LOCKED` concurrency | ☐ Pass ☐ Fail |
+| Unit | `CronExpressionParserTest` | ☑ Pass ☐ Fail |
+| Unit | `JobScannerServiceTest` | ☑ Pass ☐ Fail |
+| Unit | `HTTPCallbackExecutorTest` | ☑ Pass ☐ Fail |
+| Unit | `SimulatedTaskExecutorTest` | ☑ Pass ☐ Fail |
+| Integration | `SchedulingEndToEndIT` | ☑ Pass ☐ Fail |
+| Integration | `SkipLockedConcurrencyIT` | ☑ Pass ☐ Fail |
 | Load | Baseline API throughput | Result: _______ req/s, p95: _______ ms |
 
 ### Notes / Learnings

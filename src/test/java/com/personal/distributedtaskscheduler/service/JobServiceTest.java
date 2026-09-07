@@ -5,6 +5,7 @@ import com.personal.distributedtaskscheduler.dto.JobResponseDTO;
 import com.personal.distributedtaskscheduler.entity.Job;
 import com.personal.distributedtaskscheduler.entity.enums.JobType;
 import com.personal.distributedtaskscheduler.repository.JobRepository;
+import com.personal.distributedtaskscheduler.utility.CronExpressionParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,6 +32,9 @@ class JobServiceTest {
     @Mock
     private JobRepository jobRepository;
 
+    @Mock
+    private CronExpressionParser cronExpressionParser;
+
     @InjectMocks
     private JobService jobService;
 
@@ -50,6 +54,8 @@ class JobServiceTest {
             return toSave;
         });
 
+        when(cronExpressionParser.nextFireTime(any(), any())).thenReturn(java.time.Instant.now().plusSeconds(3600));
+
         JobResponseDTO response = jobService.createJob(request);
 
         // Verify the entity handed to save() carries the mapped values.
@@ -59,7 +65,7 @@ class JobServiceTest {
 
         assertThat(saved.getName()).isEqualTo("nightly-report");
         assertThat(saved.getJobType()).isEqualTo(JobType.HTTP_CALLBACK);
-        assertThat(saved.getCronExpression()).isEqualTo("0 0 * * *");
+        assertThat(saved.getCronExpression()).isNull();
         // These defaults are applied by the service, not the request.
         assertThat(saved.getBackoffSeconds()).isEqualTo(30);
         assertThat(saved.getMaxRetries()).isEqualTo(3);
@@ -76,7 +82,7 @@ class JobServiceTest {
         assertThat(response.getId()).isEqualTo(saved.getId().toString());
         assertThat(response.getName()).isEqualTo("nightly-report");
         assertThat(response.getJobType()).isEqualTo("HTTP_CALLBACK");
-        assertThat(response.getCronExpression()).isEqualTo("0 0 * * *");
+        assertThat(response.getCronExpression()).isNull();
     }
 
     @Test

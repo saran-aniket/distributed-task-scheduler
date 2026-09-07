@@ -22,6 +22,10 @@ public abstract class AbstractIntegrationTest {
             .withUsername("postgres")
             .withPassword("postgres");
 
+    static {
+        postgres.start();
+    }
+
     @Container
     @SuppressWarnings("resource")
     static final GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
@@ -38,5 +42,10 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.data.redis.port", () -> redis.getMappedPort(REDIS_PORT));
 
         registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+        registry.add("scheduler.batch-size", () -> 10);
+        registry.add("scheduler.dispatch-interval-ms", () -> "5000ms");
+        registry.add("scheduler.poll-interval-ms", () -> 5000);
+        registry.add("scheduler.jitter-ms", () -> 0);
+        registry.add("spring.task.scheduling.enabled", () -> false);
     }
 }
