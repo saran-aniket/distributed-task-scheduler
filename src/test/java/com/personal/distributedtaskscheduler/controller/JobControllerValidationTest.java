@@ -28,6 +28,11 @@ class JobControllerValidationTest {
     }
 
     @Test
+    void postCreateJob_withSixFieldCronExpression_failsValidation() {
+        assertInvalidCron("0 0 0 * * *");
+    }
+
+    @Test
     void postCreateJob_withTooManyFields_failsValidation() {
         assertInvalidCron("0 0 * * * *");
     }

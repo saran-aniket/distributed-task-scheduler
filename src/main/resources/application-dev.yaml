@@ -17,10 +17,15 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}
       port: ${SPRING_DATA_REDIS_PORT}
-
 management:
   health:
     db:
       enabled: true
     redis:
       enabled: true
+
+scheduler:
+  poll-interval-ms: 5000
+  jitter-ms: 2000
+  dispatch-interval-ms: 5000ms
+  batch-size: 10

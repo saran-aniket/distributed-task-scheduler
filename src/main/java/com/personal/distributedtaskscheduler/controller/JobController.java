@@ -34,4 +34,10 @@ public class JobController {
     public ResponseEntity<JobResponseDTO> createJob(@Valid @RequestBody CreateJobRequestDTO createJobRequestDTO){
         return ResponseEntity.ok().body(jobService.createJob(createJobRequestDTO));
     }
+
+    @PatchMapping(value = "/{jobId}/pause")
+    public ResponseEntity<Void> pauseJob(@PathVariable String jobId){
+        jobService.pauseJob(jobId);
+        return ResponseEntity.ok().build();
+    }
 }
