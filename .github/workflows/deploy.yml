@@ -87,7 +87,7 @@ jobs:
       - name: Build Docker Image with Environment
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: distributed-task-service
           push: false # Set to true once Docker Registry credentials are added
           tags: |
             my-app-${{ github.ref_name }}:latest
