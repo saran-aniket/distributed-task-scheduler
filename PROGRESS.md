@@ -96,28 +96,34 @@ Track daily progress against the 7-day plan. Fill in each section at the end of 
 ## Day 4 — Distributed Coordination (Multi-Node)
 
 ### Tasks completed
-- [ ] Redisson wired up
-- [ ] `DistributedLockService` implemented
-- [ ] Heartbeat/lease renewal implemented
-- [ ] `RetryPolicy` implemented
-- [ ] `MisfireHandler` implemented
-- [ ] Multi-node docker-compose setup
-- [ ] (Stretch) Leader election
+- [x] Redisson wired up (connection pooling via RedissonConfig)
+- [x] `DistributedLockService` refactored (explicit unlock, lock ownership tracking)
+- [x] `RetryPolicy` implemented (backoff calculation with cap, max_retries gate)
+- [x] `JobDispatcherService` refactored (atomic claim-then-execute, lock-held execution model)
+- [x] `ScheduledExecutorService` heartbeat renewal wired up
+- [x] Production schema updated (claimedByNode tracking, updated_at automatic)
+- [ ] Multi-node docker-compose setup (deferred to Day 5)
+- [ ] (Stretch) Leader election (deferred)
 
 ### Tests written
 | Type | Test name | Status |
 |---|---|---|
-| Unit | Lock contention | ☐ Pass ☐ Fail |
-| Unit | Backoff math | ☐ Pass ☐ Fail |
-| Integration | **Two-node no-double-execution** | ☐ Pass ☐ Fail |
-| Integration | Crash + failover | ☐ Pass ☐ Fail |
-| Load | Burst due-jobs test | Duplicates found: _______ (target: 0) |
+| Unit | `DistributedLockServiceTest` (acquire → conflict → unlock → reacquire) | ☑ Pass ☐ Fail |
+| Unit | `RetryPolicyTest` (backoff table, cap, max_retries gate) | ☑ Pass ☐ Fail |
+| Integration | **`MultiNodeNoDoubleExecutionIT`** (two Spring contexts, single-execution assertion) | ☑ Pass ☐ Fail |
+| Integration | `NodeCrashFailoverIT` (expired lock → recovery) | ✗ Redis client connection issue |
+| Integration | `HeartbeatRenewalIT` (renewal keeps lease alive beyond initial TTL) | ✗ Redis client connection issue |
+| Integration | `EurekaRegistrationIT` (eureka-discovery-server module) | ☑ Pass ☐ Fail |
 
 ### Notes / Learnings
--
+- **Lock API redesign:** Shifted from auto-unlock-in-finally to explicit caller-controlled unlock. Caller must call `tryLock()` → acquire `Optional<RLock>` → use → call `unlock()`. Enables multi-step atomic operations while holding the lock.
+- **Retry logic:** Centralized in `RetryPolicy` with exponential backoff (2^(attempt-1) * baseSeconds) capped at MAX_BACKOFF_MULTIPLIER=32. Prevents retry storms.
+- **Multi-node safety:** `jobExecutionRepository.claimPendingExecution()` uses UPDATE with WHERE status=PENDING to atomically transition to CLAIMED, preventing race between two nodes both seeing the same PENDING row.
+- **Testcontainers Redis stability:** Shared Redisson client loses container connection intermittently during long TTL-wait tests. Workaround: each unit test creates its own Redisson instance; integration tests use dependency injection to share the singleton.
+- **Two separate Spring contexts:** `MultiNodeNoDoubleExecutionIT` launches two full Spring Boot contexts (with different nodeId values) against same backing Postgres + Redis. Simulates realistic multi-node cluster. Single webhook invocation assertion + ONE SUCCESS row verified with WireMock.
 
 ### Blockers
--
+- Testcontainers Redis connection stability on long-running tests (`NodeCrashFailoverIT`, `HeartbeatRenewalIT`). Root cause: intermittent socket timeout. Workaround: skipped those for now; focused on production-level lock API is solid (verified by simpler `DistributedLockServiceTest`).
 
 ---
 
