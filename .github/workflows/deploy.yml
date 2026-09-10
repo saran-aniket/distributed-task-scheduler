@@ -7,11 +7,7 @@ on:
       - staging
       - main
   pull_request:
-    types: [ opened, synchronize, reopened ] # Triggers when PR is created, updated with new commits, or reopened
-    branches:
-      - dev
-      - staging
-      - main
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   # Job 1: Always validate code first
@@ -34,6 +30,7 @@ jobs:
   # Job 2: Deploy to the branch-specific environment
   deploy:
     needs: validate
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
 
     # Map branches to GitHub Environments dynamically
