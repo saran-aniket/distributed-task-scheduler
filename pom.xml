@@ -16,6 +16,7 @@
     <description>distributed-task-scheduler</description>
     <modules>
         <module>distributed-task-service</module>
+        <module>eureka-discovery-server</module>
     </modules>
     <url/>
     <licenses>

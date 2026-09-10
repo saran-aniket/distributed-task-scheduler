@@ -1,6 +1,6 @@
 spring:
   application:
-    name: distributed-task-scheduler
+    name: scheduler-service
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
@@ -20,6 +20,11 @@ spring:
 
   redisson-lock-prefix: "distributed_lock_"
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+
 management:
   health:
     db:
@@ -36,6 +41,7 @@ scheduler:
   lease-time-ms: 30000
   execution-timeout-ms: 75000
   misfire-check-interval-ms: 10000
+  node-id: ${NODE_ID:node-0}
 
 ---
 #Test data setup

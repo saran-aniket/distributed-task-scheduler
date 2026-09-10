@@ -21,8 +21,8 @@ public class JobScannerService {
     private final CronExpressionParser cronExpressionParser;
     private final JobRepository jobRepository;
     private final JobExecutionRepository jobExecutionRepository;
-    @Value("${scheduler.batch-size}")
-    private final int batchSize = 10;
+    @Value("${scheduler.batch-size::10}")
+    private static int batchSize;
 
     public JobScannerService(CronExpressionParser cronExpressionParser, JobRepository jobRepository, JobExecutionRepository jobExecutionRepository) {
         this.cronExpressionParser = cronExpressionParser;

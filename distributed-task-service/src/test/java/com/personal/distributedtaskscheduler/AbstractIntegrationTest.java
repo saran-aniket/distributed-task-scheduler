@@ -1,6 +1,7 @@
 package com.personal.distributedtaskscheduler;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -31,6 +32,10 @@ public abstract class AbstractIntegrationTest {
     static final GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
             .withExposedPorts(REDIS_PORT);
 
+    static {
+        redis.start();
+    }
+
     @DynamicPropertySource
     static void registerContainerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -46,6 +51,10 @@ public abstract class AbstractIntegrationTest {
         registry.add("scheduler.dispatch-interval-ms", () -> "5000ms");
         registry.add("scheduler.poll-interval-ms", () -> 5000);
         registry.add("scheduler.jitter-ms", () -> 0);
+        registry.add("scheduler.wait-time-ms", () -> 250);
+        registry.add("scheduler.lease-time-ms", () -> 3000);
+        registry.add("scheduler.node-id", () -> "test-node");
         registry.add("spring.task.scheduling.enabled", () -> false);
+        registry.add("eureka.client.enabled", () -> false);
     }
 }

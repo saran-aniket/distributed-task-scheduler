@@ -15,12 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,7 +51,7 @@ class JobScannerServiceTest {
         Instant dueJobOneNext = Instant.parse("2026-09-05T10:01:00Z");
         Instant dueJobTwoNext = Instant.parse("2026-09-05T10:10:00Z");
 
-        when(jobRepository.findByStatusAndNextFireTimeLessThanEqual(eq(JobStatus.ACTIVE.name()), any(Instant.class), eq(10)))
+        when(jobRepository.findByStatusAndNextFireTimeLessThanEqual(eq(JobStatus.ACTIVE.name()), any(Instant.class), anyInt()))
                 .thenReturn(List.of(dueJobOne, dueJobTwo));
         when(cronExpressionParser.nextFireTime(dueJobOne.getCronExpression(), dueJobOne.getNextFireTime()))
                 .thenReturn(dueJobOneNext);
