@@ -82,11 +82,10 @@ public class JobDispatcherService {
                     jobExecution.setErrorMessage(executionResult.getMessage());
                     if(retryPolicy.shouldRetry(jobExecution.getAttemptNumber(), jobExecution.getJobId().getMaxRetries())){
                         processRetry(jobExecution);
-                    }else{
-                        jobExecution.setStatus(JobExecutionStatus.FAILED);
-                        jobExecution.setCompletedAt(Instant.now());
-                        jobExecutionRepository.save(jobExecution);
                     }
+                    jobExecution.setStatus(JobExecutionStatus.FAILED);
+                    jobExecution.setCompletedAt(Instant.now());
+                    jobExecutionRepository.save(jobExecution);
                 }
             } finally {
                 distributedLockService.unlock(lockKey);

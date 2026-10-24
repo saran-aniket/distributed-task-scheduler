@@ -1,0 +1,64 @@
+# Test Environment Configuration
+# This profile loads ONLY in test environments and enables test data
+
+spring:
+  application:
+    name: scheduler-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/scheduler_test}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/test-data
+    # Configurable test data parameters
+    placeholders:
+      test.enabled: 'true'
+      test.user.prefix: "test-user-"
+      test.tenant.count: '3'
+      test.jobs.per.tenant: '5'
+      test.executions.per.job: '10'
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+  redisson-lock-prefix: "distributed_lock_test_"
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
+scheduler:
+  poll-interval-ms: 5000
+  jitter-ms: 2000
+  dispatch-interval-ms: 5000
+  batch-size: 10
+  wait-time-ms: 2000
+  lease-time-ms: 30000
+  execution-timeout-ms: 75000
+  misfire-check-interval-ms: 10000
+  node-id: ${NODE_ID:test-node-0}
+
+logging:
+  level:
+    root: INFO
+    org.flyway: DEBUG
+    org.springframework.test: DEBUG

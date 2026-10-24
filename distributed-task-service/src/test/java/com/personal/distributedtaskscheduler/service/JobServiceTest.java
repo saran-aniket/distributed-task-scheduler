@@ -3,9 +3,11 @@ package com.personal.distributedtaskscheduler.service;
 import com.personal.distributedtaskscheduler.dto.CreateJobRequestDTO;
 import com.personal.distributedtaskscheduler.dto.JobResponseDTO;
 import com.personal.distributedtaskscheduler.entity.Job;
+import com.personal.distributedtaskscheduler.entity.Tenant;
 import com.personal.distributedtaskscheduler.entity.enums.JobType;
 import com.personal.distributedtaskscheduler.repository.JobRepository;
 import com.personal.distributedtaskscheduler.utility.CronExpressionParser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -14,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.UUID;
 import java.util.List;
@@ -21,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -37,6 +43,23 @@ class JobServiceTest {
 
     @InjectMocks
     private JobService jobService;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void authenticateAsTenant(String tenantId) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(tenantId, null,
+                        List.of(new SimpleGrantedAuthority("ADMIN"))));
+    }
+
+    private Tenant tenantFor(String tenantId) {
+        Tenant tenant = new Tenant();
+        tenant.setId(UUID.fromString(tenantId));
+        return tenant;
+    }
 
     @Test
     void createJob_mapsRequestAndSavesJobWithExpectedFieldValues() {
@@ -87,8 +110,11 @@ class JobServiceTest {
 
     @Test
     void getJob_returnsMappedResponseWhenJobExists() {
+        String tenantId = UUID.randomUUID().toString();
+        authenticateAsTenant(tenantId);
         UUID jobId = UUID.randomUUID();
         Job job = new Job();
+        job.setTenant(tenantFor(tenantId));
         job.setId(jobId);
         job.setName("existing-job");
         job.setJobType(JobType.HTTP_CALLBACK);
@@ -109,18 +135,23 @@ class JobServiceTest {
 
     @Test
     void getJob_returnsNullWhenJobDoesNotExist() {
+        String tenantId = UUID.randomUUID().toString();
+        authenticateAsTenant(tenantId);
         UUID jobId = UUID.randomUUID();
         when(jobRepository.findById(jobId)).thenReturn(Optional.empty());
 
-        JobResponseDTO response = jobService.getJob(jobId.toString());
-
-        assertThat(response).isNull();
+        assertThatThrownBy(() -> jobService.getJob(jobId.toString()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Job not found");
         verify(jobRepository).findById(jobId);
     }
 
     @Test
     void getAllJobs_mapsSliceToResponseList() {
+        String tenantId = UUID.randomUUID().toString();
+        authenticateAsTenant(tenantId);
         Job jobOne = new Job();
+        jobOne.setTenant(tenantFor(tenantId));
         jobOne.setId(UUID.randomUUID());
         jobOne.setName("job-one");
         jobOne.setJobType(JobType.HTTP_CALLBACK);
@@ -128,6 +159,7 @@ class JobServiceTest {
         jobOne.setPayload(Map.of("name", "one"));
 
         Job jobTwo = new Job();
+        jobTwo.setTenant(tenantFor(tenantId));
         jobTwo.setId(UUID.randomUUID());
         jobTwo.setName("job-two");
         jobTwo.setJobType(JobType.INTERNAL_JOB);

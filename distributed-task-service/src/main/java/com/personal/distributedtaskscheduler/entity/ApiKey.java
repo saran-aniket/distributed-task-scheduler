@@ -14,7 +14,10 @@ public class ApiKey extends BaseModel{
     @JoinColumn(name = "tenant_id", nullable = false, columnDefinition = "uuid")
     private Tenant tenant;
 
-    @Column(name = "key_hash", columnDefinition = "varchar(255)")
+    @Column(name = "key_prefix", columnDefinition = "varchar(255)", nullable = false)
+    private String keyPrefix;
+
+    @Column(name = "key_hash", columnDefinition = "varchar(255) NOT NULL" , unique = true, nullable = false)
     private String keyHash;
 
     @Enumerated(EnumType.STRING)
@@ -55,5 +58,13 @@ public class ApiKey extends BaseModel{
 
     public void setRevokedAt(Instant revokedAt) {
         this.revokedAt = revokedAt;
+    }
+
+    public String getKeyPrefix() {
+        return keyPrefix;
+    }
+
+    public void setKeyPrefix(String keyPrefix) {
+        this.keyPrefix = keyPrefix;
     }
 }

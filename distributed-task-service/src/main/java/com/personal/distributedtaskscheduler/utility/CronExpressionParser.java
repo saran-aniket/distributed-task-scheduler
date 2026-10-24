@@ -33,7 +33,7 @@ public class CronExpressionParser {
 
         String[] parts = trimmed.split("\\s+");
         if (parts.length == 5) {
-            return "* " + trimmed;
+            return "0 " + trimmed;
         }
 
         return trimmed;

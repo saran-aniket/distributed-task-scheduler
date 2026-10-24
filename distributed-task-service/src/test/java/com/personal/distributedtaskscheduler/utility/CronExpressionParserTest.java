@@ -17,7 +17,7 @@ class CronExpressionParserTest {
 
         Instant nextFireTime = cronExpressionParser.nextFireTime("* * * * *", from);
 
-        assertThat(nextFireTime).isEqualTo(Instant.parse("2026-09-05T10:15:31Z"));
+        assertThat(nextFireTime).isEqualTo(Instant.parse("2026-09-05T10:16:00Z"));
     }
 
     @Test

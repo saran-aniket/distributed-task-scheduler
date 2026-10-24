@@ -25,11 +25,11 @@ public class SimulatedJobExecutor implements JobExecutor {
     public ExecutionResult execute(JobExecution jobExecution, Job job) {
         log.info("Executing simulated job: {}", job.getName());
         Map<String, Object> payload = job.getPayload();
-        long baseDurationMs = ((Number) payload.get("baseDurationMs")).longValue();
-        long jitterDurationMs = ((Number) payload.get("jitterMs")).longValue();
+        long baseDurationMs = payload.containsKey("baseDurationMs") ? ((Number) payload.get("baseDurationMs")).longValue() : 0;
+        long jitterDurationMs = payload.containsKey("jitterMs") ? ((Number) payload.get("jitterMs")).longValue() : 0;
         long durationMs = baseDurationMs + ThreadLocalRandom.current().nextLong(jitterDurationMs + 1);
-        boolean shouldFail = (boolean) payload.get("shouldFail");
-        String failureReason = (String) payload.get("failureReason");
+        boolean shouldFail = payload.containsKey("shouldFail") && (boolean) payload.get("shouldFail");
+        String failureReason = payload.containsKey("failureReason") ? (String) payload.get("failureReason") : null;
         Instant startedAt = Instant.now();
         try {
             Thread.sleep(durationMs);

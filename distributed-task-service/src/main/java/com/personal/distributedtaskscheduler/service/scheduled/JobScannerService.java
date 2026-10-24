@@ -21,8 +21,8 @@ public class JobScannerService {
     private final CronExpressionParser cronExpressionParser;
     private final JobRepository jobRepository;
     private final JobExecutionRepository jobExecutionRepository;
-    @Value("${scheduler.batch-size::10}")
-    private static int batchSize;
+    @Value("${scheduler.batch-size:10}")
+    private int batchSize;
 
     public JobScannerService(CronExpressionParser cronExpressionParser, JobRepository jobRepository, JobExecutionRepository jobExecutionRepository) {
         this.cronExpressionParser = cronExpressionParser;
@@ -43,6 +43,7 @@ public class JobScannerService {
             jobExecutionRepository.save(jobExecution);
 
             job.setNextFireTime(cronExpressionParser.nextFireTime(job.getCronExpression(), job.getNextFireTime()));
+            jobRepository.save(job);
         }
     }
 }
